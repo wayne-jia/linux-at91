@@ -775,7 +775,7 @@ static int atmel_hlcdc_plane_atomic_check(struct drm_plane *p,
 		if (!hstate->bpp[i])
 			return -EINVAL;
 
-		switch (hstate->base.rotation & DRM_MODE_ROTATE_MASK) {
+		switch (hstate->base.rotation & (DRM_MODE_ROTATE_MASK | DRM_MODE_REFLECT_MASK)) {
 		case DRM_MODE_ROTATE_90:
 			offset = (hstate->src_y / ydiv) *
 				 fb->pitches[i];
@@ -804,6 +804,19 @@ static int atmel_hlcdc_plane_atomic_check(struct drm_plane *p,
 			hstate->pstride[i] = -fb->pitches[i] - hstate->bpp[i];
 			break;
 		case DRM_MODE_ROTATE_0:
+			break;
+		case DRM_MODE_REFLECT_X:
+			offset = (hstate->src_y / ydiv) * fb->pitches[i];
+			offset += (hstate->src_w - 1) * hstate->bpp[i];
+			hstate->xstride[i] = 2 * (hstate->src_w - 1) * hstate->bpp[i];
+			hstate->pstride[i] = -2 * hstate->bpp[i];
+			break;
+		case DRM_MODE_REFLECT_Y:
+			offset = (hstate->src_y / ydiv) * fb->pitches[i];
+			offset += hstate->src_w * (hstate->src_h - 1) * hstate->bpp[i];
+			hstate->xstride[i] = -2 * hstate->src_w * hstate->bpp[i];
+			hstate->pstride[i] = 0;
+			break;
 		default:
 			offset = (hstate->src_y / ydiv) * fb->pitches[i];
 			offset += (hstate->src_x / xdiv) * hstate->bpp[i];
@@ -1042,7 +1055,9 @@ static int atmel_hlcdc_plane_init_properties(struct atmel_hlcdc_plane *plane)
 							 DRM_MODE_ROTATE_0 |
 							 DRM_MODE_ROTATE_90 |
 							 DRM_MODE_ROTATE_180 |
-							 DRM_MODE_ROTATE_270);
+							 DRM_MODE_ROTATE_270 |
+							 DRM_MODE_REFLECT_X |
+							 DRM_MODE_REFLECT_Y);
 		if (ret)
 			return ret;
 	}
