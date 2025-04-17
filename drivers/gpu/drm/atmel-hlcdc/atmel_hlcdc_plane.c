@@ -486,7 +486,7 @@ void atmel_xlcdc_plane_update_general_settings(struct atmel_hlcdc_plane *plane,
 		       ATMEL_XLCDC_LAYER_SFACTA_ONE |
 		       ATMEL_XLCDC_LAYER_DFACTC_M_A0_MULT_AS |
 		       ATMEL_XLCDC_LAYER_DFACTA_ONE;
-		if (format->has_alpha)
+		if (!format->has_alpha)
 			cfg |= ATMEL_XLCDC_LAYER_A0(0xff);
 		else
 			cfg |= ATMEL_XLCDC_LAYER_A0(state->base.alpha);

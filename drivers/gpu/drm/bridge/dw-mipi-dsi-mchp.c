@@ -316,7 +316,7 @@ static int dw_mipi_dsi_mchp_get_lane_mbps(void *priv_data,
 	mpclk = DIV_ROUND_UP(mode->clock, MSEC_PER_SEC);
 	if (mpclk) {
 		/* take 1/0.8, since mbps must be bigger than bandwidth of RGB */
-		desired_mbps = mpclk * (bpp / lanes) * 10 / 8;
+		desired_mbps = mpclk * (bpp / lanes);
 		if (desired_mbps < max_mbps) {
 			target_mbps = desired_mbps;
 		} else {
@@ -521,7 +521,7 @@ static int dw_mipi_dsi_mchp_remove(struct platform_device *pdev)
 }
 
 static const struct dw_mipi_dsi_mchp_chip_data sam9x75_chip_data = {
-	.max_data_lanes = 4,
+	.max_data_lanes = 2,
 	.phy_ops = &dw_mipi_dsi_mchp_phy_ops,
 };
 

@@ -78,7 +78,7 @@ static void atmel_hlcdc_crtc_mode_set_nofb(struct drm_crtc *c)
 	unsigned long mode_rate;
 	struct videomode vm;
 	unsigned long prate;
-	unsigned int mask = ATMEL_HLCDC_CLKDIV_MASK | ATMEL_HLCDC_CLKPOL;
+	unsigned int mask = ATMEL_HLCDC_CLKDIV_MASK | ATMEL_HLCDC_CLKPOL | ATMEL_XLCDC_CLKBYP;
 	unsigned int cfg = 0;
 	int div, ret;
 	bool is_xlcdc = crtc->dc->desc->is_xlcdc;
@@ -121,7 +121,7 @@ static void atmel_hlcdc_crtc_mode_set_nofb(struct drm_crtc *c)
 		     (vm.hsync_len - 1) | ((vm.vsync_len - 1) << 16));
 
 	regmap_write(regmap, ATMEL_HLCDC_CFG(2),
-		     (vm.vfront_porch - 1) | (vm.vback_porch << 16));
+		     (vm.vfront_porch - 1) | ((vm.vback_porch - 1) << 16));
 
 	regmap_write(regmap, ATMEL_HLCDC_CFG(3),
 		     (vm.hfront_porch - 1) | ((vm.hback_porch - 1) << 16));
@@ -179,6 +179,7 @@ static void atmel_hlcdc_crtc_mode_set_nofb(struct drm_crtc *c)
 	    connector->display_info.bus_flags & DRM_BUS_FLAG_PIXDATA_DRIVE_NEGEDGE)
 		cfg |= ATMEL_HLCDC_CLKPOL;
 
+	cfg = 0x00000003;
 	regmap_update_bits(regmap, ATMEL_HLCDC_CFG(0), mask, cfg);
 
 	state = drm_crtc_state_to_atmel_hlcdc_crtc_state(c->state);
@@ -192,6 +193,7 @@ static void atmel_hlcdc_crtc_mode_set_nofb(struct drm_crtc *c)
 	if (!is_xlcdc && (adj->flags & DRM_MODE_FLAG_NHSYNC))
 		cfg |= ATMEL_HLCDC_HSPOL;
 
+	cfg = 0x10d94;
 	regmap_update_bits(regmap, ATMEL_HLCDC_CFG(5),
 			   ATMEL_HLCDC_HSPOL | ATMEL_HLCDC_VSPOL |
 			   ATMEL_HLCDC_VSPDLYS | ATMEL_HLCDC_VSPDLYE |

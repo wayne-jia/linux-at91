@@ -121,9 +121,67 @@
 	status = "okay";
 };
 
+&flx1 {
+	atmel,flexcom-mode = <ATMEL_FLEXCOM_MODE_USART>;
+	status = "okay";
+
+	uart1: serial@200 {
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_flx1_usart_default>;
+		status = "okay";
+	};
+};
+
 &flx6 {
 	atmel,flexcom-mode = <ATMEL_FLEXCOM_MODE_TWI>;
 	status = "okay";
+};
+
+&dsi {
+	status = "okay";
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	ports {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		port@0 {
+			reg = <0>;
+			dsi_in: endpoint {
+				remote-endpoint = <&hlcdc_panel_output>;
+			};
+		};
+
+		port@1 {
+			reg = <1>;
+			dsi_out: endpoint {
+				remote-endpoint = <&mipi_in_panel>;
+			};
+		};
+	};
+};
+
+&hlcdc {
+	clocks = <&pmc PMC_TYPE_PERIPHERAL 25>, <&pmc PMC_TYPE_GCK 25>, <&clk32k 1>;
+	clock-names = "periph_clk", "sys_clk", "slow_clk";
+	assigned-clocks = <&pmc PMC_TYPE_GCK 25>;
+	assigned-clock-rates = <50000000>;
+	status = "okay";
+
+	hlcdc-display-controller {
+		port@0 {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			hlcdc_panel_output: endpoint@0 {
+				reg = <0>;
+				remote-endpoint = <&dsi_in>;
+			};
+		};
+	};
+
+	hlcdc_pwm: hlcdc-pwm {
+		status = "disabled";
+	};
 };
 
 &i2c6 {
@@ -135,6 +193,25 @@
 	i2c-digital-filter;
 	i2c-digital-filter-width-ns = <35>;
 	status = "okay";
+
+	panel: panel_disp@45 {
+		reg = <0x45>;
+		compatible = "waveshare,4inch-panel";
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		port@0 {
+			reg = <0>;
+			mipi_in_panel: endpoint {
+				remote-endpoint = <&dsi_out>;
+			};
+		};
+	};
+
+	touch: goodix@14 {
+		reg = <0x14>;
+		compatible = "goodix,gt911";
+	};
 
 	pmic@5b {
 		compatible = "microchip,mcp16502";
@@ -324,6 +401,11 @@
 			atmel,pins =
 				<AT91_PIOA 24 AT91_PERIPH_A AT91_PINCTRL_PULL_UP
 				 AT91_PIOA 25 AT91_PERIPH_A AT91_PINCTRL_PULL_UP>;
+		};
+		pinctrl_flx1_usart_default: mikrobus-uart {
+			atmel,pins = 
+			    <AT91_PIOA 29 AT91_PERIPH_A AT91_PINCTRL_PULL_UP
+				 AT91_PIOA 28 AT91_PERIPH_A AT91_PINCTRL_NONE>;
 		};
 	};
 

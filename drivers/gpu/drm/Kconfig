@@ -37,6 +37,7 @@ config DRM_MIPI_DBI
 
 config DRM_MIPI_DSI
 	bool
+	default y
 	depends on DRM
 
 config DRM_DEBUG_MM
